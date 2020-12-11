@@ -6,13 +6,23 @@
  <div class="col-sm"></div>
  <div class="col-sm">
  <form>
- <div class="form-group">
+    <div class="form-group">
+ <label for="exampleInputName">Name</label>
+ <input type="email" class="form-control"
+id="exampleInputName" aria-describedby="nameHelp" placeholder="Enter name" />
+ </div>
+    <div class="form-group">
+ <label for="exampleInputSurname">Surname</label>
+ <input type="email" class="form-control"
+id="exampleInputSurname" aria-describedby="surnameHelp" placeholder="Enter surname" />
+ </div>
+    <div class="form-group">
  <label for="exampleInputEmail1">Email address</label>
  <input type="email" class="form-control"
 id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" />
  </div>
- <div class="form-group">
- <label for="exampleInputPassword1">Password</label>
+    <div class="form-group">
+ <label for="exampleInputPassword2">Password</label>
  <input type="password" class="form-control"
 id="exampleInputPassword1" placeholder="Password" />
  </div>
