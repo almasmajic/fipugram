@@ -7,31 +7,35 @@
  <div class="col-sm">
  <form>
     <div class="form-group">
- <label for="exampleInputName">Name</label>
- <input type="email" class="form-control"
-id="exampleInputName" aria-describedby="nameHelp" placeholder="Enter name" />
- </div>
-    <div class="form-group">
- <label for="exampleInputSurname">Surname</label>
- <input type="email" class="form-control"
-id="exampleInputSurname" aria-describedby="surnameHelp" placeholder="Enter surname" />
- </div>
-    <div class="form-group">
  <label for="exampleInputEmail1">Email address</label>
- <input type="email" class="form-control"
-id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" />
+ <input 
+ type="email"
+ v-model="username"
+ class="form-control"
+ id="exampleInputEmail1" 
+ aria-describedby="emailHelp" 
+ placeholder="Enter email" 
+ />
  </div>
     <div class="form-group">
  <label for="exampleInputPassword2">Password</label>
- <input type="password" class="form-control"
-id="exampleInputPassword1" placeholder="Password" />
+ <input type="password" 
+ v-model="password"
+ class="form-control"
+ id="exampleInputPassword1" 
+ placeholder="Password" 
+ />
  </div>
   <div class="form-group">
  <label for="exampleInputPassword1">Confirm password</label>
- <input type="password" class="form-control"
-id="exampleInputPassword1" placeholder="Confirm password" />
+ <input type="password" 
+ v-model="passwordConfirm"
+ class="form-control"
+ id="exampleInputPassword1" 
+ placeholder="Confirm password" 
+ />
  </div>
- <button type="submit" class="btn btn-primary">Sign up</button>
+ <button type="button" @click="signup" class="btn btn-primary">Sign up</button>
  </form>
  </div>
  <div class="col-sm"></div>
@@ -39,3 +43,31 @@ id="exampleInputPassword1" placeholder="Confirm password" />
  </div>
  </div>
 </template>
+
+<script>
+import { firebase } from '@/firebase';
+
+export default {
+   name: 'Signup',
+   data(){
+      return {
+         username: '',
+         password: '',
+         passwordConfirm: '',
+      }
+   },
+   methods:{
+      signup(){
+         //ubaciti if koji provjerava slazu li se lozinke; ako ne, izbacuje alert
+         firebase.auth().createUserWithEmailAndPassword(this.username, this.password)
+         .then(function(){
+            console.log('Registracija uspješna');
+         })
+         .catch(function(error){
+            console.error('Došlo je do pogreške', error) //dodati alert da treba odabrati dulji password (min 6 znakova)
+         });
+         console.log('Nastavak');
+      }
+   }
+}
+</script>
