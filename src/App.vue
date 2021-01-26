@@ -25,11 +25,14 @@
                   aria-label="Search">
           </form>
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
+          <li v-if="!store.currentUser" class="nav-item">
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
-          <li class="nav-item">
+          <li v-if="!store.currentUser" class="nav-item">
             <router-link to="/signup" class="nav-link">Signup</router-link>
+          </li>
+          <li v-if="store.currentUser" class="nav-item">
+            <a href="#" @click.prevent="logout()" class="nav-link">Logout</a>  
           </li>
         </ul>
       </div>
@@ -43,13 +46,39 @@
 
 <script>
 import store from '@/store';
+import { firebase } from '@/firebase';
+import router from '@/router'
+
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    // User is signed in.
+    console.log('***', user.email);
+    store.currentUser = user.email
+  } else {
+    //User is not signed in.
+    console.log('*** No user');
+    store.currentUser = null;
+
+    if (router.name != "Login"){
+      router.push ( { name : "Login"})
+    }
+  }
+});
+
   export default{
   name: 'app',
   data(){
     return {
       store //ako imamo istoimeni kljuc i vrijednost
-    }
-  }
+    };
+  },
+  methods: {
+    logout(){
+      firebase.auth().signOut().then(() => {
+        this.$router.push({ name: 'Login'});
+      });
+    },
+  },
 };
 </script> 
 
