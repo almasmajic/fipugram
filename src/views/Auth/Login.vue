@@ -43,8 +43,6 @@ export default {
             .signInWithEmailAndPassword(this.username, this.password)
             .then((result) => {
                 console.log('Uspjesna prijava', result);
-
-                this.$router.replace({ name: 'Home'});
             })
             .catch(function(e){
                 console.error('Greška', e);

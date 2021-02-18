@@ -50,17 +50,24 @@ import { firebase } from '@/firebase';
 import router from '@/router'
 
 firebase.auth().onAuthStateChanged((user) => {
+   const currentRoute = router.currentRoute; 
+
+  console.log('PROVJERA STANJA LOGINA!')
   if (user) {
     // User is signed in.
     console.log('***', user.email);
     store.currentUser = user.email
+
+    if (!currentRoute.meta.needsUser){
+      router.push ({ name : 'Home'})
+    }
   } else {
     //User is not signed in.
-    console.log('*** No user');
+    console.log('No user');
     store.currentUser = null;
 
-    if (router.name != "Login"){
-      router.push ( { name : "Login"})
+    if (currentRoute.meta.needsUser){
+      router.push ({ name : 'Login'})
     }
   }
 });
@@ -74,7 +81,8 @@ firebase.auth().onAuthStateChanged((user) => {
   },
   methods: {
     logout(){
-      firebase.auth().signOut().then(() => {
+      firebase.auth().signOut()
+      .then(() => {
         this.$router.push({ name: 'Login'});
       });
     },
