@@ -40,7 +40,7 @@ router.beforeEach ((to, from, next) => {
   if (noUser && to.meta.needsUser) {
     next('login');
   }else {
-    next();
+    next(); //u protivnom dozvoli promjenu rute
   }
 });
 
