@@ -1,4 +1,5 @@
 # fipugram
+-Instagram clone for FIPU 
 
 ## Project setup
 ```
