@@ -26,7 +26,7 @@ id="imageDescription"
  <button type="submit" class="btn btn-primary ml-2">Post
 image</button>
  </form>
-            <instagram-card v-for="card in filteredCards" :key="card.url" :info="card" />
+            <instagram-card v-for="card in filteredCards" :key="card.id" :info="card" />
           </div>
           <div class="col-4"></div>
       </div>
@@ -38,15 +38,13 @@ import InstagramCard from '@/components/InstagramCard.vue';
 import store from '@/store';
 import {db} from "@/firebase";
 
-let cards = [];
-
 //... API/firebase -> sve kartice -> cards
 
-cards = [
+/* cards = [
   {url: "https://picsum.photos/id/1/400/400", description: 'laptop', time: 'few minutes ago...'},
   {url: "https://picsum.photos/id/2/400/400", description: 'laptop #2', time: 'an hour ago...'},
   {url: "https://picsum.photos/id/3/400/400", description: 'laptop #3', time: 'two hours ago...'},
-];
+]; */
 
 
 
@@ -54,13 +52,36 @@ export default {
   name: 'Home',
   data: function(){
       return {
-        cards,
+        cards : [],
         store,
         newImageDescription: "",
         newImageUrl: ""
     };
   },
+  mounted(){
+    this.getPosts();
+  //dohvat iz Firebasea
+  },
   methods:{
+    getPosts(){
+      console.log('Firebase dohvat...')
+
+      db.collection("posts")
+      .get()
+      .then((query) => { //query je instanca querySnapshota; then pisemo jer je promise
+        this.cards = [] //isprazni kartice u slucaju visestrukog poziva getPosts() -> kako bi izbjegli gomilanje
+        query.forEach((doc) => { //iterira kroz sve; potreban je callback
+          const data = doc.data(); //nece se mijenjat vise
+
+          this.cards.push({ //cards iz data returna
+               id: doc.id, //definiramo objekte koje smo prije imali rucno postavljeni
+               time: data.posted_at,
+               description: data.desc,
+               url: data.url,
+          }) 
+        }) 
+      })
+    },
     postNewImage(){
       const imageUrl = this.newImageUrl; 
       const imageDescription = this.newImageDescription;
@@ -75,6 +96,7 @@ export default {
         console.log('Spremljeno', doc);
         this.newImageDescription = "";
         this.newImageUrl = "";
+        this.getPosts(); //iznova dohvaca nase postove i refresha
         alert("Slika je prenesena") //dodaj obavijest koja ce korisniku rec da je slika uspjesno prenesena
       })
       .catch((e) => { 
