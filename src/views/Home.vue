@@ -2,9 +2,10 @@
       <div class="row">
           
           <div class="col-8">
-            <form @submit.prevent="postNewImage" class="mb-5">
+             <img v-if="loading" class="loading" :src = "require('@/assets/loading.gif')" />
+            <form v-if="!loading" @submit.prevent="postNewImage" class="mb-5">
  <div class="form-group">
- <croppa :width="400" :height="400" placeholder="Ucitaj sliku" v-model="imageReference"></croppa>
+ <croppa :width="400" :height="400" placeholder="Učitaj sliku" v-model="imageReference"></croppa>
  </div>
  <div class="form-group">
  <label for="imageDescription">Description</label>
@@ -29,7 +30,7 @@ image</button>
 // @ is an alias to /src
 import InstagramCard from '@/components/InstagramCard.vue';
 import store from '@/store';
-import {db} from "@/firebase";
+import {db,storage} from "@/firebase";
 
 //... API/firebase -> sve kartice -> cards
 
@@ -45,6 +46,7 @@ export default {
   name: 'Home',
   data: function(){
       return {
+        loading: false,
         cards : [],
         store,
         newImageDescription: "",
@@ -70,7 +72,7 @@ export default {
           const data = doc.data(); //nece se mijenjat vise
 
           this.cards.push({ //cards iz data returna
-               id: doc.id, //definiramo objekte koje smo prije imali rucno postavljeni
+               id: data.id, //definiramo objekte koje smo prije imali rucno postavljeni
                time: data.posted_at,
                description: data.desc,
                url: data.url,
@@ -78,28 +80,44 @@ export default {
         }) 
       })
     },
-    postNewImage(){
-      const imageUrl = this.newImageUrl; 
-      const imageDescription = this.newImageDescription;
+    getImage(){ //promise based, omotac oko callbacka
 
-      db.collection("posts").add({
-          url: imageUrl,
-          desc: imageDescription,
-          email: store.currentUser,
-          posted_at: Date.now(),
+      return new Promise((resolveFn, errorFn)=> {
+        this.imageReference.generateBlob(data => {
+          resolveFn(data);
+        })
       })
-      .then((doc)=> { 
-        console.log('Spremljeno', doc);
-        this.newImageDescription = "";
-        this.newImageUrl = "";
-        this.getPosts(); //iznova dohvaca nase postove i refresha
-        alert("Slika je prenesena") //dodaj obavijest koja ce korisniku rec da je slika uspjesno prenesena
-      })
-      .catch((e) => { 
-        console.error(e);
-        alert.error("Doslo je do pogreske, slika nije ucitana")
-      })
-    }
+    },
+    async postNewImage(){
+      try{
+        this.loading = true;
+      //this.imageReference.generateBlob(blobData =>{
+        let blobData = await this.getImage()
+        let imageName = "posts/" + store.currentUser + "/" + Date.now() + ".png"
+        let result = await storage.ref(imageName).put(blobData)
+        let url = await result.ref.getDownloadURL();
+        
+            console.log('Javni link', url);
+
+            const imageDescription = this.newImageDescription; //arrow function cuva this
+
+            let doc = await db.collection("posts").add({
+              url: url,
+              desc: imageDescription,
+              email: store.currentUser,
+              posted_at: Date.now(),
+            });
+    
+            console.log('Spremljeno', doc);
+            alert("Slika je prenesena")
+            this.newImageDescription = '';
+
+            this.getPosts(); //iznova dohvaca nase postove i refresha
+          } catch (e){
+            console.error('Greska', e)
+          }
+          this.loading = false;
+      }
   },
   computed: {
     filteredCards(){
@@ -114,3 +132,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .loading {
+    width: 60px
+  }
+</style>
