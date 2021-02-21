@@ -2,16 +2,9 @@
       <div class="row">
           
           <div class="col-8">
-            <form @submit.prevent="postNewImage" class="form-inline mb-5">
+            <form @submit.prevent="postNewImage" class="mb-5">
  <div class="form-group">
- <label for="imageUrl">Image URL</label>
- <input
- v-model="newImageUrl"
-type="text"
-class="form-control ml-2"
-placeholder="Enter the image URL"
-id="imageUrl"
- />
+ <croppa :width="400" :height="400" placeholder="Ucitaj sliku" v-model="imageReference"></croppa>
  </div>
  <div class="form-group">
  <label for="imageDescription">Description</label>
@@ -55,7 +48,8 @@ export default {
         cards : [],
         store,
         newImageDescription: "",
-        newImageUrl: ""
+        newImageUrl: "",
+        imageReference: null, //referenca na sliku; nije string
     };
   },
   mounted(){
@@ -67,6 +61,8 @@ export default {
       console.log('Firebase dohvat...')
 
       db.collection("posts")
+      .limit(10)
+      .orderBy("posted_at", "desc")
       .get()
       .then((query) => { //query je instanca querySnapshota; then pisemo jer je promise
         this.cards = [] //isprazni kartice u slucaju visestrukog poziva getPosts() -> kako bi izbjegli gomilanje
